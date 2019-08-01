@@ -38,7 +38,8 @@ output "service_sg_id" {
 
 output "task_definition_arn" {
   description = "The ARN of the task definition."
-  value       = "${element(compact(concat(aws_ecs_task_definition.task_for_code_deploy.*.arn, aws_ecs_task_definition.task.*.arn)), 0)}"
+  value = "${element(compact(concat(aws_ecs_task_definition.task_for_code_deploy.*.arn, aws_ecs_task_definition.task.*.arn)), 0)}"
+}
 
 output "service_name" {
   description = "The name of the service."
