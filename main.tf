@@ -202,7 +202,7 @@ resource "aws_ecs_service" "code_deployed_service" {
   }
 
   lifecycle {
-    ignore_changes = ["desired_count", "task_definition"]
+    ignore_changes = ["desired_count", "task_definition", "load_balancer.*"]
   }
 }
 
