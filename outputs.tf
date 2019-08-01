@@ -43,7 +43,7 @@ output "task_definition_arn" {
 
 output "service_name" {
   description = "The name of the service."
-  value       = "${aws_ecs_service.service.name}"
+  value       = "${element(compact(concat(aws_ecs_service.code_deployed_service.*.name, aws_ecs_service.service.*.name)), 0)}"
 }
 
 output "log_group_name" {
