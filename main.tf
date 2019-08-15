@@ -77,7 +77,6 @@ resource "aws_lb_target_group" "task" {
   port         = "${var.task_container_port}"
   target_type  = "ip"
   health_check = ["${var.health_check}"]
-  name_prefix  = "${var.name_prefix}"
 
   # NOTE: TF is unable to destroy a target group while a listener is attached,
   # therefor we have to create a new one before destroying the old. This also means
