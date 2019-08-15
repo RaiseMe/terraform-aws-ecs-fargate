@@ -77,6 +77,7 @@ resource "aws_lb_target_group" "task" {
   port         = "${var.task_container_port}"
   target_type  = "ip"
   health_check = ["${var.health_check}"]
+  name_prefix  = "${var.name_prefix}"
 
   # NOTE: TF is unable to destroy a target group while a listener is attached,
   # therefor we have to create a new one before destroying the old. This also means
@@ -185,7 +186,7 @@ resource "aws_ecs_service" "code_deployed_service" {
   depends_on                         = ["null_resource.lb_exists"]
   name                               = "${var.name_prefix}"
   cluster                            = "${var.cluster_id}"
-  task_definition                    = "${element(compact(concat(aws_ecs_task_definition.task_for_code_deploy.*.arn, aws_ecs_task_definition.task.*.arn)), 0)}"
+  task_definition                    = "${aws_ecs_task_definition.task_for_code_deploy.*.arn}"
   desired_count                      = "${var.desired_count}"
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = "${var.deployment_minimum_healthy_percent}"
@@ -210,7 +211,7 @@ resource "aws_ecs_service" "code_deployed_service" {
   }
 
   lifecycle {
-    ignore_changes = ["desired_count", "task_definition", "load_balancer"]
+    ignore_changes = ["desired_count", "task_definition"]
   }
 }
 
@@ -220,7 +221,7 @@ resource "aws_ecs_service" "service" {
   depends_on                         = ["null_resource.lb_exists"]
   name                               = "${var.name_prefix}"
   cluster                            = "${var.cluster_id}"
-  task_definition                    = "${element(compact(concat(aws_ecs_task_definition.task_for_code_deploy.*.arn, aws_ecs_task_definition.task.*.arn)), 0)}"
+  task_definition                    = "${aws_ecs_task_definition.task.*.arn}"
   desired_count                      = "${var.desired_count}"
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = "${var.deployment_minimum_healthy_percent}"
