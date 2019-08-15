@@ -185,7 +185,7 @@ resource "aws_ecs_service" "code_deployed_service" {
   depends_on                         = ["null_resource.lb_exists"]
   name                               = "${var.name_prefix}"
   cluster                            = "${var.cluster_id}"
-  task_definition                    = "${aws_ecs_task_definition.task_for_code_deploy.*.arn}"
+  task_definition                    = "${aws_ecs_task_definition.task_for_code_deploy.0.arn}"
   desired_count                      = "${var.desired_count}"
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = "${var.deployment_minimum_healthy_percent}"
@@ -220,7 +220,7 @@ resource "aws_ecs_service" "service" {
   depends_on                         = ["null_resource.lb_exists"]
   name                               = "${var.name_prefix}"
   cluster                            = "${var.cluster_id}"
-  task_definition                    = "${aws_ecs_task_definition.task.*.arn}"
+  task_definition                    = "${aws_ecs_task_definition.task.0.arn}"
   desired_count                      = "${var.desired_count}"
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = "${var.deployment_minimum_healthy_percent}"
