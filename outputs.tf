@@ -26,6 +26,11 @@ output "execution_role_arn" {
   value       = "${aws_iam_role.execution.arn}"
 }
 
+output "execution_role_name" {
+  description = "The name of the task execution role."
+  value       = "${aws_iam_role.execution.name}"
+}
+
 output "task_role_name" {
   description = "The name of the service role."
   value       = "${aws_iam_role.task.name}"
