@@ -36,8 +36,16 @@ variable "task_container_assign_public_ip" {
   default     = "false"
 }
 
+variable "task_container_ports" {
+  description = "Ports that the container exposes."
+}
+
 variable "task_container_port" {
-  description = "Port that the container exposes."
+  description = "Ports that the container exposes."
+}
+
+variable "task_container_port_count" {
+  description = "Number of ports that the container exposes."
 }
 
 variable "task_container_protocol" {

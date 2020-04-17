@@ -100,6 +100,16 @@ data "null_data_source" "task_environment" {
   }
 }
 
+data "null_data_source" "task_container_ports" {
+  count = "${var.task_container_port_count}"
+
+  inputs = {
+    containerPort = "${element(keys(var.task_container_ports), count.index)}"
+    hostPort = "${element(values(var.task_container_ports), count.index)}"
+    protocol = "tcp"
+  }
+}
+
 resource "aws_ecs_task_definition" "task_for_code_deploy" {
   count = "${var.deployment_controller_type == "CODE_DEPLOY" ? 1 : 0}"
 
@@ -116,13 +126,7 @@ resource "aws_ecs_task_definition" "task_for_code_deploy" {
     "name": "${var.name_prefix}",
     "image": "${var.task_container_image}",
     "essential": true,
-    "portMappings": [
-        {
-            "containerPort": ${var.task_container_port},
-            "hostPort": ${var.task_container_port},
-            "protocol":"tcp"
-        }
-    ],
+    "portMappings": ${jsonencode(data.null_data_source.task_container_ports.*.outputs)},
     "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
