@@ -222,6 +222,10 @@ resource "aws_ecs_service" "service" {
       container_name = var.container_name != "" ? var.container_name : var.name_prefix
     }
   }
+
+  lifecycle {
+    ignore_changes = var.deployment_controller_type == "CODE_DEPLOY" ? [desired_count, task_definition, load_balancer] : []
+  }
 }
 
 # HACK: The workaround used in ecs/service does not work for some reason in this module, this fixes the following error:
