@@ -228,10 +228,6 @@ resource "aws_ecs_service" "ecs_deployed_service" {
       container_name = var.container_name != "" ? var.container_name : var.name_prefix
     }
   }
-
-  lifecycle {
-    ignore_changes = var.deployment_controller_type == "CODE_DEPLOY" ? [desired_count, task_definition, load_balancer] : []
-  }
 }
 
 resource "aws_ecs_service" "code_deployed_service" {
