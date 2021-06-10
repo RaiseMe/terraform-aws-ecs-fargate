@@ -183,7 +183,13 @@ resource "aws_ecs_task_definition" "task" {
 EOF
 }
 
-resource "aws_ecs_service" "service" {
+locals {
+  aws_ecs_service = var.deployment_controller_type == "CODE_DEPLOY" ? aws_ecs_service.code_deployed_service[0] : aws_ecs_service.ecs_deployed_service[0]
+}
+
+resource "aws_ecs_service" "ecs_deployed_service" {
+  count = var.deployment_controller_type == "CODE_DEPLOY" ? 0 : 1
+
   depends_on                         = [null_resource.lb_exists]
   name                               = var.name_prefix
   cluster                            = var.cluster_id
@@ -225,6 +231,53 @@ resource "aws_ecs_service" "service" {
 
   lifecycle {
     ignore_changes = var.deployment_controller_type == "CODE_DEPLOY" ? [desired_count, task_definition, load_balancer] : []
+  }
+}
+
+resource "aws_ecs_service" "code_deployed_service" {
+  count = var.deployment_controller_type == "CODE_DEPLOY" ? 1 : 0
+
+  depends_on                         = [null_resource.lb_exists]
+  name                               = var.name_prefix
+  cluster                            = var.cluster_id
+  task_definition                    = aws_ecs_task_definition.task.arn
+  desired_count                      = var.desired_count
+  launch_type                        = "FARGATE"
+  deployment_minimum_healthy_percent = var.deployment_minimum_healthy_percent
+  deployment_maximum_percent         = var.deployment_maximum_percent
+  health_check_grace_period_seconds  = var.lb_arn == "" ? null : var.health_check_grace_period_seconds
+
+  network_configuration {
+    subnets          = var.private_subnet_ids
+    security_groups  = [aws_security_group.ecs_service.id]
+    assign_public_ip = var.task_container_assign_public_ip
+  }
+
+  dynamic "load_balancer" {
+    for_each = var.lb_arn == "" ? [] : [1]
+    content {
+      container_name   = var.container_name != "" ? var.container_name : var.name_prefix
+      container_port   = var.task_container_port
+      target_group_arn = aws_lb_target_group.task.arn
+    }
+  }
+
+  deployment_controller {
+    # The deployment controller type to use. Valid values: CODE_DEPLOY, ECS.
+    type = var.deployment_controller_type
+  }
+
+  dynamic "service_registries" {
+    for_each = var.service_registry_arn == "" ? [] : [1]
+    content {
+      registry_arn   = var.service_registry_arn
+      container_port = var.with_service_discovery_srv_record ? var.task_container_port : null
+      container_name = var.container_name != "" ? var.container_name : var.name_prefix
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [desired_count, task_definition, load_balancer]
   }
 }
 
