@@ -243,6 +243,7 @@ resource "aws_ecs_service" "code_deployed_service" {
   deployment_minimum_healthy_percent = var.deployment_minimum_healthy_percent
   deployment_maximum_percent         = var.deployment_maximum_percent
   health_check_grace_period_seconds  = var.lb_arn == "" ? null : var.health_check_grace_period_seconds
+  propagate_tags                     = "SERVICE"
 
   network_configuration {
     subnets          = var.private_subnet_ids
